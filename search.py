@@ -29,19 +29,19 @@ def alphabeta_search(board, d=2):
             beta = min(beta, v)
         return v
 
-    chosen_board = argmax(board.get_available_moves(),
-       lambda next_board: min_value(next_board, -infinity, infinity, 0))
+    chosen_board = argmin(board.get_available_moves(),
+       lambda next_board: max_value(next_board, -infinity, infinity, 0))
 
     return chosen_board
 
-def argmax(seq, fn):
+def argmin(seq, fn):
     """Return an element with lowest fn(seq[i]) score; tie goes to first one.
     >>> argmax(['one', 'to', 'three'], len)
-    'three'
+    'to'
     """
-    best = seq[0]; best_score = -fn(best)
+    best = seq[0]; best_score = fn(best)
     for x in seq:
-        x_score = -fn(x)
+        x_score = fn(x)
         if x_score < best_score:
             best, best_score = x, x_score
     return best

@@ -1,6 +1,9 @@
 import random
 
+infinity = 1e400
+
 class Board():
+
     def __init__(self, board, size, to_move):
         self.board = board
         self.size = size
@@ -134,9 +137,24 @@ class Board():
         return [new_board]
 
     def is_terminal_state(self):
-        return self.is_connected(1) or self.is_connected(2)
+        return self.winner() != -1
+
+    def winner(self):
+        is_p1_connected = self.is_connected(1)
+        is_p2_connected = self.is_connected(2)
+        if is_p1_connected and not is_p2_connected:
+            return 1
+        elif is_p2_connected and not is_p1_connected:
+            return 2
+        elif is_p1_connected and is_p2_connected:
+            return 0
+        else:
+            return -1
 
     def is_connected(self, player):
+        return self.count_connected_groups(player) == 1
+
+    def count_connected_groups(self, player):
         groups = []
         for x in range(self.size):
             for y in range(self.size):
@@ -151,7 +169,7 @@ class Board():
                 groups = groups_to_preserve
                 merged = [s for g in groups_to_merge for s in g]
                 groups += [merged]
-        return len(groups) == 1
+        return len(groups)
 
     def is_connected_to_group(self, x, y, group):
         for (i, j) in group:
@@ -160,5 +178,35 @@ class Board():
         return False
 
     def score(self):
-        # TODO write an eval function
-        return random.randint(0, 100)
+        winner = self.winner()
+        if winner != -1:
+            if winner == 0:
+                return 0
+            if winner == self.to_move:
+                return infinity
+            else:
+                return -infinity
+        return self.player_score(self.to_move) - self.player_score(3 - self.to_move)
+
+    def player_score(self, player):
+        coords = []
+        for x in range(self.size):
+            for y in range(self.size):
+                if self.board[x][y] == player:
+                    coords.append((x, y))
+        v = self.variance(coords)
+        if v == 0: return infinity
+        inv_v = 1 / v
+        inv_g = 1 / self.count_connected_groups(player)
+        return inv_v + 3 * inv_g
+
+    def variance(self, coords):
+        n = len(coords)
+        if n == 1: return 0
+        x_sum = sum([c[0] for c in coords])
+        y_sum = sum([c[1] for c in coords])
+        x_mean = x_sum / n
+        y_mean = y_sum / n
+        x_var = sum(map(lambda i: (i[0] - x_mean)**2, coords)) / (n - 1)
+        y_var = sum(map(lambda i: (i[1] - y_mean)**2, coords)) / (n - 1)
+        return x_var + y_var
