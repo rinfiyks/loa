@@ -1,5 +1,4 @@
 from board import Board
-from mcts import pure_mcts_search
 from search import alphabeta_search
 
 def game_loop():
