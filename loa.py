@@ -10,7 +10,7 @@ def game_loop():
             if winner == 0:
                 print("It's a tie")
             else:
-                print("Player {} has won".format(winner))
+                print('Player {} has won'.format(winner))
             break
         b = alphabeta_search(b)
 
